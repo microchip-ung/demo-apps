@@ -1,0 +1,88 @@
+diff --git a/build/configs/istax_multi.mk b/build/configs/istax_multi.mk
+index fbaff9c..2f7becc 100644
+--- a/build/configs/istax_multi.mk
++++ b/build/configs/istax_multi.mk
+@@ -59,6 +59,8 @@ ISTAX_PROFILE_LIST =        \
+ # $1: package name
+ # $2: profile name
+ 
++Custom/AddModules = demo
++
+ # Build all listed profiles
+ $(eval $(foreach p,$(ISTAX_PROFILE_LIST),$(call DefineTargetByPackage,istax,$(p))))
+ 
+diff --git a/vtss_appl/include/vtss/appl/module_id.h b/vtss_appl/include/vtss/appl/module_id.h
+index c124290..bbb6f5c 100644
+--- a/vtss_appl/include/vtss/appl/module_id.h
++++ b/vtss_appl/include/vtss/appl/module_id.h
+@@ -211,6 +211,7 @@ enum {
+     VTSS_MODULE_ID_FRR_OSPF6            = 156,
+     VTSS_MODULE_ID_FRER                 = 157,
+     VTSS_MODULE_ID_KR                   = 158,
++    VTSS_MODULE_ID_DEMO                 = 159,
+ 
+     /*
+      * INSERT NEW MODULE IDS HERE. AND ONLY HERE!!!
+diff --git a/vtss_appl/main/main.cxx b/vtss_appl/main/main.cxx
+index c46ae75..59be75b 100644
+--- a/vtss_appl/main/main.cxx
++++ b/vtss_appl/main/main.cxx
+@@ -472,6 +472,10 @@
+ #include "vtss_ssh_api.h"
+ #endif
+ 
++#ifdef VTSS_SW_OPTION_DEMO
++#include "demo_api.h"
++#endif
++
+ #if defined(VTSS_SW_OPTION_OPTIONAL_MODULES)
+ #include "vtss_optional_modules_api.h"
+ #endif
+@@ -902,7 +906,9 @@ static struct {
+ #ifdef VTSS_SW_OPTION_PSFP
+     INITFUN(psfp_init)
+ #endif
+-
++#ifdef VTSS_SW_OPTION_DEMO
++    INITFUN(demo_init)
++#endif
+ // **** NOTE: vtss_icfg_late_init must be last in this list ****
+ #ifdef VTSS_SW_OPTION_ICFG
+     INITFUN(vtss_icfg_late_init)
+@@ -1316,6 +1322,11 @@ const char *error_txt(mesa_rc rc)
+             txt = kr_error_txt(rc);
+             break;
+ #endif
++#ifdef VTSS_SW_OPTION_DEMO
++        case VTSS_MODULE_ID_DEMO:
++            txt = demo_error_txt(rc);
++            break;
++#endif
+         default:
+             txt = txt_default;
+             break;
+diff --git a/vtss_appl/util/vtss_module_id.cxx b/vtss_appl/util/vtss_module_id.cxx
+index 3361ebc..303206a 100644
+--- a/vtss_appl/util/vtss_module_id.cxx
++++ b/vtss_appl/util/vtss_module_id.cxx
+@@ -190,6 +190,7 @@ const char * const vtss_module_names[VTSS_MODULE_ID_NONE + 1] =
+     [VTSS_MODULE_ID_FRR_OSPF6]             /* 156 */ = "OSPFv6",
+     [VTSS_MODULE_ID_FRER]                  /* 157 */ = "FRER",
+     [VTSS_MODULE_ID_KR]                    /* 158 */ = "KR",
++    [VTSS_MODULE_ID_DEMO]                  /* 159 */ = "DEMO",
+ 
+     /* Add new module name above it. And please don't use space
+        in module name, use underscore instead. */
+@@ -539,7 +540,11 @@ const int vtss_priv_lvl_groups_filter[VTSS_MODULE_ID_NONE+1] =
+     /*[VTSS_MODULE_ID_FRR_OSPF6]             156 */ 1,
+     /*[VTSS_MODULE_ID_FRER]                  157 */ 1,
+     /*[VTSS_MODULE_ID_KR]                    158 */ 1,
+-
++#ifdef VTSS_SW_OPTION_DEMO
++    /*[VTSS_MODULE_ID_DEMO]                  159 */ 1,
++#else
++    /*[VTSS_MODULE_ID_DEMO]                  159 */ 1,
++#endif
+     /* Hint:
+      * For a new module, if the module needs an independent privilege level group
+      * then the filter value should be equal 0. If this module is included by other

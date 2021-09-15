@@ -1,0 +1,39 @@
+
+! This is a plain-text template file for the initial specification of commands
+! for the new VTSS ICLI.
+!
+! Please read icli-cmd-spec-README.txt for details and guidance.
+!
+
+privileged exec
+  show demo
+
+global config
+! Enable the DEMO functionality.
+  demo  forward [port|acl|mac]
+  no demo  forward [port|acl|mac]
+
+  demo msg <cmd:0-17>
+  no demo msg <cmd:0-17>
+
+  demo npi <port:0-28> [use-ifh]
+  no demo npi <port:0-28> [use-ifh]
+
+! fwd_mode vtss_vstax_fwd_mode_t
+
+!  demo encode [switch-frm <switch_frm:0-1>] [dst-port-mask] [cos <cos:0-7>]  [tx-vstax-hdr {none|bin|sym} [ [fwd-mode {look-up|upsid-port|cpu-upsid|cpu-all}]    [ttl <ttl:0-65000>]     [prio <prio:0-8> ]     [upsid <upsid:0-31> ]       ]   ]
+
+  demo encode [switch-frm <switch_frm:0-1>] [dst-port-mask] [cos <cos:0-7>]  [tx-vstax-hdr {none|bin|sym} [ [fwd-mode {look-up|upsid-port|cpu-upsid|cpu-all}]    [ttl <ttl:0-65000>]     [prio <prio:0-8> ]     [upsid <upsid:0-31> ]     [tci vid <tci_vid:0-4095> cfi <tci_cfi:0-1> tagprio <tci_tagprio:0-7> ]     [port-no <port_no:0-1000> ]     [chip-port <chip_no:0-1000> ]     [glag-no <glag_no:0-1000> ]     [queue-no <queue_no:0-1000> ]     [keep-ttl <keep_ttl:0-1000> ]     [dp <dp:0-3> ]     ]   ]
+
+
+interface ethernet <port_id>
+  demoif
+  no demoif
+
+  demotx
+
+interface vlan <vlan_id>
+  vitesse rules <some_number:1-57>
+  no vitesse rules <some_number:1-57>
+
+! End of file.
