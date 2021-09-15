@@ -1,0 +1,108 @@
+@chapter Adding module to the MSCC application
+This document is meant as a guide to implementing a module in the MSCC application environment. The module
+we shall implement is called @i{demo}, and the purpose it to learn how to hook a new module, here demo, into
+MSCC application.
+
+@section Preparation
+
+This module shall be placed under @file{vtss_appl}, i.e., @file{vtss_appl/demo/}
+
+Goto the @file{build} directory. If you have not already setup a link @file{config.mk}, then run
+@file{make} which will provide you with a list of posibilities. Choose one, e.g.
+@file{ln -s configs/ce_switch_caracal1_l10_ref.mk config.mk}.
+
+I suggest you build the MSCC application before doing any changed. You will in that case have files
+that you can practise on in the two section below, where it is explaind howto do a ramload and howto
+use JTAG/GDB.
+
+To make life easy, generate tags, i.e., @file{make TAGS}. Then you have tags for the emacs
+editor. That will be usefull in the following so that you do not have to find files explicit,
+but instead can search for a specific name that will get you to the right location.
+
+@section Ramload
+In order to test the code that we are going to build in the following, it is recommended
+to use ramload. This means that the code is only uploaded to the ram and therefore does not make changed to the device.
+
+When the code has been compiled, the result is in @file{build/obj} as either a @file{.dat} file for eCos
+or a @file{.mfi} for linux.
+This file is ramloaded to the device in the following way (in case of eCos)
+@verbatim
+# platform debug allow
+# debug firmware ramload tftp://a.b.c.d/some/path/xxx.dat
+@end verbatim
+When the target reboot press @code{Ctrl-C} in redboot and follow the instruction
+that redboot print. That usually means you have to give the command @file{ramload} and
+then wait for the target to boot.
+
+@section JTAG and GDB
+For eCos an @file{.elf}, which is located in the same directory as @file{.dat}, can be loaded with
+GDB. The figure below illustrate the setup we will use:
+@verbatim
+          JTAG/RS232          USB         Network/loop
+            |                  |              |
+ +--------+ V  +-------------+ V  +---------+ V   +---------------------+
+ | Target |----| Flyswatter2 |--+-| OpenOCD |--+--| Machine running GDB |
+ +--------+    +-------------+  | +---------+  |  +---------------------+
+                                |              |  
+                           +---------+         |  +------------------------+
+                           | Minicom |         +--| Machine running telnet |
+                           +---------+            +------------------------+
+
+@end verbatim
+
+@subsection Install Flyswatter2
+The Flyswatter2@footnote{www.tincantools.com/JTAG/Flyswatter2.html} is connected to the target with a ARM20MIPS14 cable, and to the PC running OpenOCD
+with an USB cable. On a linux PC the following two devices turn up
+@verbatim
+  /dev/ttyUSB0
+  /dev/ttyUSB1
+@end verbatim
+The first device it the one that controls JTAG, and the second is the one
+controlling the RS232 of the Flyswatter2.
+
+You can connect to the @file{ttyUSB1} with @file{Minicom}. The OpenOCD
+is going to connect to @file{ttyUSB0}.
+
+@subsection Install OpenOCD
+
+On fedora you can install OpenOCD by giving the command
+@verbatim
+$ sudo dnf install openocd
+@end verbatim
+which as of writing will install 0.9.0.
+Also you need configuration files for running agains the different evaluation
+boards. Do
+@verbatim
+$ cd 
+$ git clone git://github.com/vtss/openocd-config-vtss vtss
+@end verbatim
+which will create the directory @file{vtss} in your home directory.
+If you are in your home directory, the OpenOCD is started with
+@verbatim
+$ openocd -f interface/ftdi/flyswatter2.cfg -f vtss/serval1-ref.cfg
+@end verbatim
+The @file{flyswatter2.cfg} is located in
+@file{/usr/share/openocd/scripts/interface/ftdi} or
+something similar.
+In the 2nd file @file{serval1-ref.cfg} you can find the socket ports
+that GDB and telnet can connect to. These are commented out in this config file
+but should be commented in, i.e.
+@verbatim
+telnet_port 4444
+gdb_port 3333
+@end verbatim
+So this means, that you can telnet to OpenOCD by telnetting to port 4444 on 
+the machine on which OpenOCD is running.
+Similar GDB can connect to port 3333.
+
+@subsection Run GDB
+For eCos the GDB tool to use is @file{/opt/vtss-cross-ecos-mips32-24kec-v2/bin/mipsel-vtss-elf-gdb}.
+If you go into the @file{build/obj} directory where the @file{.elf} file is, and the start GDB, you get the prompt.
+Then connect to OpenOCD with @code{target remote a.b.c.d:3333}. In the OpenOCD console you should be able to see
+that the connect succeed.
+
+Then you shall load the code @code{load xxx.elf} and the symbols @code{file xxx.elf}. Then you can set a break point in e.g.
+@code{cyg_user_start()} with @code{break cyg_user_start}. Then say @code{continue} or just @code{C} and enter,
+and the code start running until it hit the break point.
+
+

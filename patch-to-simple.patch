@@ -1,0 +1,86 @@
+diff --git a/build/configs/smb_switch_caracal1_l10_ref.mk b/build/configs/smb_switch_caracal1_l10_ref.mk
+index 47ba190..a9f52fa 100644
+--- a/build/configs/smb_switch_caracal1_l10_ref.mk
++++ b/build/configs/smb_switch_caracal1_l10_ref.mk
+@@ -24,6 +24,7 @@
+ 
+ include $(BUILD)/make/templates/eCosSwitch.in
+ 
++Custom/AddModules := demo
+ # Custom/eCosConfig := debug
+ Custom/OmitModules := poe
+ 
+diff --git a/vtss_appl/include/vtss/appl/module_id.h b/vtss_appl/include/vtss/appl/module_id.h
+index fa2e68c..87eabc5 100644
+--- a/vtss_appl/include/vtss/appl/module_id.h
++++ b/vtss_appl/include/vtss/appl/module_id.h
+@@ -184,6 +184,7 @@ enum {
+     VTSS_MODULE_ID_MPLS_TP              = 127,
+     VTSS_MODULE_ID_TT_LOOP              = 128,
+     VTSS_MODULE_ID_JSON_RPC_NOTIFICATION= 129,
++    VTSS_MODULE_ID_DEMO                 = 130,
+ 
+     /*
+      * INSERT NEW MODULE IDS HERE. AND ONLY HERE!!!
+diff --git a/vtss_appl/main/main.c b/vtss_appl/main/main.c
+index f58f434..8b649fa 100644
+--- a/vtss_appl/main/main.c
++++ b/vtss_appl/main/main.c
+@@ -440,6 +440,10 @@
+ #include "diag_api.h"
+ #endif
+ 
++#if defined(VTSS_SW_OPTION_DEMO)
++#include "demo_api.h"
++#endif
++
+ #if defined(CYGPKG_IO_FILEIO) && defined(CYGPKG_FS_RAM) && defined(VTSS_SW_OPTION_ICFG)
+ #include <unistd.h>
+ #include <cyg/fileio/fileio.h>
+@@ -855,6 +859,10 @@ static struct {
+     INITFUN(vtss_diag_init)
+ #endif
+ 
++#if defined(VTSS_SW_OPTION_DEMO)
++    INITFUN(demo_init)
++#endif
++
+ // **** NOTE: vtss_icfg_late_init must be last in this list ****
+ #ifdef VTSS_SW_OPTION_ICFG
+     INITFUN(vtss_icfg_late_init)
+@@ -1211,6 +1219,11 @@ const char *error_txt(vtss_rc rc)
+             txt = afi_error_txt(rc);
+             break;
+ #endif
++#if defined(VTSS_SW_OPTION_DEMO)
++        case VTSS_MODULE_ID_DEMO:
++            txt = demo_error_txt(rc);
++            break;
++#endif
+         default:
+             txt = txt_default;
+             break;
+diff --git a/vtss_appl/util/vtss_module_id.c b/vtss_appl/util/vtss_module_id.c
+index afd6fb5..e32368b 100644
+--- a/vtss_appl/util/vtss_module_id.c
++++ b/vtss_appl/util/vtss_module_id.c
+@@ -163,6 +163,7 @@ const char * const vtss_module_names[VTSS_MODULE_ID_NONE + 1] =
+     [VTSS_MODULE_ID_MPLS_TP]          /* 127 */ = "MPLS_TP",
+     [VTSS_MODULE_ID_TT_LOOP]          /* 128 */ = "TT_LOOP",
+     [VTSS_MODULE_ID_JSON_RPC_NOTIFICATION]      = "JSON_RPC_Notification",
++    [VTSS_MODULE_ID_DEMO]             /* 130 */  = "DEMO",
+ 
+     /* Add new module name above it. And please don't use space
+        in module name, use underscore instead. */
+@@ -506,6 +507,11 @@ const int vtss_priv_lvl_groups_filter[VTSS_MODULE_ID_NONE+1] =
+ #else
+     /*[VTSS_MODULE_ID_JSON_RPC_NOTIFICATION] 129 */ 1,
+ #endif
++#if defined(VTSS_SW_OPTION_DEMO)
++    /*[VTSS_MODULE_ID_DEMO]             130 */ 1,
++#else
++    /*[VTSS_MODULE_ID_DEMO]             130 */ 1,
++#endif
+ 
+     /* Hint:
+      * For a new module, if the module needs an independent privilege level group

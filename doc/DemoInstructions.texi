@@ -1,0 +1,28 @@
+\input texinfo
+
+@set UPDATED 1. Februar 2017
+@c @set EDITION 0.8.0-rc1
+@set VERSION 0.1
+
+
+@setfilename info-main
+@settitle name-main
+
+@titlepage
+@titlefont{@emph{Demo code:}}
+@sp 1
+@title In the MSCC environment
+@subtitle for release @value{VERSION}
+@subtitle @value{UPDATED}
+
+@end titlepage
+@contents
+@paragraphindent none
+@setcontentsaftertitlepage
+@include demo.toc
+
+@include chapter1.texi
+@include chapter2.texi
+@include chapter3.texi
+
+@bye

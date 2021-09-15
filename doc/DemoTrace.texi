@@ -1,0 +1,26 @@
+\input texinfo
+
+@set UPDATED April 5th 2017
+@c @set EDITION 0.8.0-rc1
+@set VERSION 0.1
+
+
+@setfilename info-main
+@settitle name-main
+
+@titlepage
+@titlefont{@emph{Trace debug:}}
+@sp 1
+@title In the MSCC environment
+@subtitle for release @value{VERSION}
+@subtitle @value{UPDATED}
+
+@end titlepage
+@contents
+@paragraphindent none
+@setcontentsaftertitlepage
+@include tracedebug.toc
+
+@include tracedebug1.texi
+
+@bye

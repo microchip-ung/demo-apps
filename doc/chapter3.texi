@@ -1,0 +1,198 @@
+@chapter The examples
+@section ICFG
+When a device boot, the ICLI commands listed in the startup-config is run.
+The configuration can se seen with @code{show running-config}.
+When running @code{show running-config} each module is quired for there configuration
+to the extend that they have registerd configuration parameters. How this is done for the demo module
+is show in @file{demo_icfg.c}.
+
+In this file are instructions to register some attributes for the demo module, that you have to do in
+order to make the code compile.
+
+The output from the attribute functions are used, as mentioned, when @code{show running-config} is
+run; but also when you do save the configuration with @code{copy running-config startup-config}.
+The output of ICFG must therefore match the ICLI commands if they are going to have any effect.
+
+@section ICLI
+This is where you implement commands. Look in the @file{demo.icli} file.
+
+@section Trace
+The recommended way to implement debug print is not by means of @code{printf()} but
+as descibed in @file{demo_trace.c}.
+
+In our case the have the DEMO module, with is identified @code{VTSS_MODULE_ID_DEMO}.
+Within a module we can divide debug prints into groups. See @file{demo_trace.h}.
+In @file{demo_trace.c} the array @code{trace_grps[]} configure parameters for
+each group. If we run
+@verbatim
+debug trace module level demo
+@end verbatim
+it should be obvious what the meaning of this array. In our case, we have set the
+print level the @code{VTSS_TRACE_LVL_WARNING}. This can be changed runtime with
+@verbatim
+debug trace module level demo msg debug
+@end verbatim
+After having run this command a print statement in @file{demo_msg.c} like @code{T_DG(...)}
+will show up.
+
+@section MSG (demo_msg.c)
+
+The function @code{demo_msg_tx()} will send a message @code{DEMO_MESSAGE_SOMETHING}
+to the module @code{VTSS_MODULE_ID_DEMO}. This function is called if the ICLI command
+@code{demo msg <0-17>} is given. See @file{demo.icli}.
+
+The @code{demo_register_msg()}, which is called from @file{demo.c} when the module is initialized,
+do register the funciton @code{demo_msg_rx()}, which is called, when a message is sent to the
+@code{VTSS_MODULE_ID_DEMO}.
+
+If you search for @code{TRACE_GRP_MSG} in @file{demo_msg.c}, you will see all the places where
+somehing can be printed to the console.
+The level on which these mesages are printed can be seen with
+@code{debug trace module level demo msg}. The default level is @code{warning}. In order to
+see @code{T_DG()} you'll have to lower the level to altleast @code{debug}, i.e.,
+@code{debug trace module levet demo msg debug}. If you do that, and run the ICLI command @code{demo msg 0}
+you'll see output on the console that illustrate the functionality.
+
+@section Frames to/from the CPU
+
+@subsection Receiving a frame
+When the CPU shall receive a frame, then there are basically 3 steps as described in the sections below.
+In a generel setup we can have a stack of switches. One switch is the master and all the others are slaves.
+The MSCC application run on the master, and all the slaves has to goto a slave state where they do ``slave stuff''.
+
+If we have only one switch, i.e. no stack, then that device is master. The reason for pointing this out is,
+that when a frame is received on a port in a stack, and that frame is for the CPU, i.e. the CPU on the master,
+then the CPU which is on the switch on which the receiving port exist must configure the switch chip so that the
+frame is sent to the local CPU, regardless on whether the switch is master or slave. This described below in 2.5.1.
+
+When the local CPU get the frame, it must be told what to do with it. That is described in 2.5.2. A function is registers
+and called when a frames match the criteria configured. This callback function shall make sure, that the
+frames is forwarded to the master CPU.
+
+And finally the frame arive at the master CPU in 2.5.3.
+
+@subsubsection Forward packet to the local CPU
+In @file{demo_forward.c} the 3 methods are shown that will have a frames forwarded to the CPU.
+Note, that this will only get the frames to the CPU - which sounds obvious, but it does not get the
+frame to the process that eventually wants it. How this is done is illustrated in a subsequent section.
+
+In a stack solution there is one master switch and all other switchs are slave. The MSCC application run
+on the master switch/CPU. Therefore when a frame is received on a slave, like a L2CP frame, then that frame
+first have to be sent to the CPU of the slave on which it was received, and that CPU has to make sure that it is
+forwarded to the master CPU.
+
+The methods below show how a frame get to the CPU of the switch on which it is received, i.e., master or slave.
+
+@enumerate
+@item
+@code{forward_frame_to_cpu_method1()} shows how we on a port basis can be configured which L2CP frames shall be sent to the CPU.
+L2CP frames are frames with destination MAC address @code{01:80:C2:00:00:XY} where @code{X=0,2} and 
+@code{X=0,1,2,...,F}.
+
+@item
+@code{forward_frame_to_cpu_method2()} configure the MAC forwarding table. In this case you specify a destination MAC address
+and some other parameters like VLAN that shall apply to the frames.
+
+@item
+@code{forward_frame_to_cpu_method3()}. In this case a ACL rule is configured. The show an api and an appl method.
+@end enumerate
+
+@subsubsection Forward packet from local CPU to master CPU
+In @file{demo_packet.c} a filter and a callback function is configured and registered in @code{demo_register_packet()}.
+When a packet is received by the CPU it is match against this filter, and if it match, then callback function @code{demo_packet_rx()} is
+called. All this happens on the switch on which the packet is received, i.e., master or slave CPU.
+
+In the callback function @code{demo_packet_rx()} the packet is forwarded to the master CPU via the l2proto module.
+
+Next section show how to received the packet on the master CPU.
+
+@subsubsection Handling of frame at the master CPU
+In @file{demo_l2proto.c} we register, that packets to the demo module, which is identified with @code{VTSS_MODULE_ID_DEMO} (see section 1.2),
+shall be sent to the callback function @code{demo_l2_rx()}. This function copy the frame and some other information to the @code{demo_rx_buffer}
+and then signals the thread that shall process the frame.
+
+The processing thread is @code{demo_thread()} in @file{demo.c} 
+
+@subsection Transmit a frame
+In @file{demo_tx_frame.c} it is show how a frame ca be sent. The
+function @code{demo_tx_frame()} is called by doing the ICLI commands
+@verbatim
+# configure terminal
+(config)# interface gi 1/1  //e.g.
+(config-if)# demotx [vtss-os-tx | packet-tx] 00:01:c1:11:22:33 [switch]
+@end verbatim
+In case of @code{vtss-os-tx} the @code{switch} parameter does not have any effect,
+and can be left out. This will call the @code{demo_os_tx_method_1(port_no,dmac)} function.
+The @code{00:01:c1:11:22:33} is the @code{dmac}. The frame will be sent on port @code{port_no}
+and apply to a stack.
+
+In case of @code{packet-txx} the @code{switch} parameter do apply. In this case the
+@code{demo_packet_tx_method_2(port_no,dmac,switch)}. If @code{switch=false} then
+the frame will be sent on port @code{port_no}. This function only work on the local
+switch in case of a stack. If @code{swtch=true}, then the @code{port_no} does not apply
+and the frames is switched the normal way.
+
+@subsection Test
+Have two switch that are connected. On one switch enable trace messages, i.e.
+@verbatim
+# platform debug allow
+# debug trace module level demo packet debug
+@end verbatim
+This enable debug info from @file{demo_packet.c} when a frame is received that match
+this filter, which is frames sent to the CPU with destination MAC address @code{00:01:c1:11:22:33}.
+This filter has been installed then the demo module was initialized. See in @file{demo.c}; serach for function
+@code{demo_register_packet()}.
+
+In order for instruct frames that will match this filter to be sent to the CPU, run
+@verbatim
+# configure terminal
+(config)# demo forward mac
+@end verbatim
+which will run method 2 in @file{demo_forward.c}. Now the receiver is ready.
+
+On the other switch do
+@verbatim
+# configure terminal
+(config)# int gi 1/1
+(config-if)# demotx packet-tx 00:01:c1:11:22:33 switch
+@end verbatim
+This will run method 2 in @file{demo_tx_frame.c}, and the remoten end show say
+that a frames has been received.
+
+If the @code{switch} option was not given, then the frame would only be sent
+on port @code{gi 1/1} in which case the remote end would only receive the frame if it
+happened to be on the port.
+
+The behavoiur is similar if @code{packet-tx} without @code{switch} is replaced with @code{vtss-os-tx}. The only difference
+is that the second case will work in a stack. If a stack does not apply, then the @code{packet-tx} method is prefered.
+
+
+@subsection Sockets
+In the files @file{demo_socket_[client|server].c} an example is show on how to use sockets. The struct is similar to
+how things are done in UNIX. The example show a server which wait for a client to connect, and then send back a message and the
+stop the server again. The server is started with
+@verbatim
+#configure terminal
+(config)# demo socket server
+@end verbatim
+On the other device the client is run with
+@verbatim
+#configure terminal
+(config)# demo socket client a.b.c.d
+@end verbatim
+where @code{a.b.c.d} is the IP address of the server device, which is found with
+@verbatim
+# show ip int b
+@end verbatim
+
+@section Web
+The @file{demo_web.c} contain a simple example of web code. In this file it is explained how
+to hook up a web menu in the system. This is done by editing the @file{vtss_appl/web/menu_default.cxx}.
+In order to have a web menu, some html code must be implemented. In this example this is located under
+@file{demo/platform/html/demo.htm}. Look in the @file{module_demo.in_advance} and search for
+@code{WEB_CONTENT}.
+If the ICLI command @code{debug trace module level demo web debug} is given, then output can be
+seen in the console when changes are performed in the web.
+
+
+

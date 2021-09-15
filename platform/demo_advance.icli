@@ -1,0 +1,1561 @@
+#
+# Vitesse Switch software.
+#
+# Copyright (c) 2002-2012 Vitesse Semiconductor Corporation "Vitesse". All
+# Rights Reserved.
+#
+# Unpublished rights reserved under the copyright laws of the United States of
+# America, other countries and international treaties. Permission to use, copy,
+# store and modify, the software and its source code is granted. Permission to
+# integrate into other products, disclose, transmit and distribute the software
+# in an absolute machine readable format (e.g. HEX file) is also granted.  The
+# source code of the software may not be disclosed, transmitted or distributed
+# without the written permission of Vitesse. The software and its source code
+# may only be used in products utilizing the Vitesse switch products.
+#
+# This copyright notice must appear in any copy, modification, disclosure,
+# transmission or distribution of the software. Vitesse retains all ownership,
+# copyright, trade secret and proprietary rights in the software.
+#
+# THIS SOFTWARE HAS BEEN PROVIDED "AS IS," WITHOUT EXPRESS OR IMPLIED WARRANTY
+# INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR USE AND NON-INFRINGEMENT.
+#
+
+MODULE_IF_FLAG =
+
+INCLUDE_BEGIN
+
+// --- Include demo.h since we need it in the code below.
+#include "demo_api.h"
+#include "demo.h"
+
+u32  demo_session_id;
+
+INCLUDE_END
+
+FUNCTION_BEGIN
+FUNCTION_END
+
+EXPORT_BEGIN
+EXPORT_END
+
+!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = show demo
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = ICLI_CMD_PROP_GREP
+
+CMD_MODE = ICLI_CMD_MODE_EXEC
+MODE_VAR = 
+
+! 1: show
+! 2: demo
+
+CMD_VAR = 
+CMD_VAR = 
+
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+demo_session_id = session_id;
+
+// --- Send a event to the demo_thread
+vtss_flag_setbits(&demo_thread_flag, DEMO_FLAG_SHOW_DEMO);
+
+CODE_END
+
+CMD_END
+
+!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo forward [ port | acl | mac ]
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+NO_FORM_DOC_CMD_DESC    = 
+NO_FORM_DOC_CMD_DEFAULT = 
+NO_FORM_DOC_CMD_USAGE   = 
+NO_FORM_DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR = 
+
+! 1: demo
+! 2: forward
+! 3: port
+! 4: acl
+! 5: mac
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = has_port
+CMD_VAR = has_acl
+CMD_VAR = has_mac
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = port : Option
+BYWORD = acl : Option
+BYWORD = mac : Option
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+NO_FORM_VARIABLE_BEGIN
+NO_FORM_VARIABLE_END
+
+CODE_BEGIN
+
+demo_session_id = session_id;
+
+if (has_port) debug_forwarding_control(TRUE, 1);
+if (has_mac) debug_forwarding_control(TRUE, 2);
+if (has_acl) debug_forwarding_control(TRUE, 3);
+
+CODE_END
+
+NO_FORM_CODE_BEGIN
+
+demo_session_id = session_id;
+
+if (has_port) debug_forwarding_control(FALSE, 1);
+if (has_mac) debug_forwarding_control(FALSE, 2);
+if (has_acl) debug_forwarding_control(FALSE, 3);
+
+NO_FORM_CODE_END
+
+CMD_END
+
+!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo msg <0-17>
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+NO_FORM_DOC_CMD_DESC    = 
+NO_FORM_DOC_CMD_DEFAULT = 
+NO_FORM_DOC_CMD_USAGE   = 
+NO_FORM_DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR = 
+
+! 1: demo
+! 2: msg
+! 3: <0-17>
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = cmd
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = <Cmd : 0-17>
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+NO_FORM_VARIABLE_BEGIN
+NO_FORM_VARIABLE_END
+
+CODE_BEGIN
+demo_session_id = session_id;
+
+demo_msg_tx((vtss_isid_t)cmd);
+CODE_END
+
+NO_FORM_CODE_BEGIN
+NO_FORM_CODE_END
+
+CMD_END
+
+!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = vitesse rules <1-57>
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_INTERFACE_VLAN
+MODE_VAR = vlist
+
+! 1: vitesse
+! 2: rules
+! 3: <1-57>
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = some_number
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = <SomeNumber : 3-57>
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+CODE_END
+
+CMD_END
+
+!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demoif
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+NO_FORM_DOC_CMD_DESC    = 
+NO_FORM_DOC_CMD_DEFAULT = 
+NO_FORM_DOC_CMD_USAGE   = 
+NO_FORM_DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_INTERFACE_PORT_LIST
+MODE_VAR = plist
+
+! 1: demoif
+
+CMD_VAR = 
+
+RUNTIME = 
+
+HELP = 
+
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+NO_FORM_VARIABLE_BEGIN
+NO_FORM_VARIABLE_END
+
+CODE_BEGIN
+CODE_END
+
+NO_FORM_CODE_BEGIN
+NO_FORM_CODE_END
+
+CMD_END
+
+!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demotx
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_INTERFACE_PORT_LIST
+MODE_VAR = plist
+
+! 1: demotx
+
+CMD_VAR = 
+
+RUNTIME = 
+
+HELP = 
+
+BYWORD = 
+
+VARIABLE_BEGIN
+  u32 i;
+VARIABLE_END
+
+CODE_BEGIN
+demo_session_id = session_id;
+
+//  Loop over ports
+for (i = 0; i < plist->cnt; ++i) {
+
+   u16 portBegin = plist->switch_range[i].begin_iport;
+   u16 portEnd = portBegin + plist->switch_range[i].port_cnt;
+   u16 iport;
+
+   for (iport = portBegin; iport < portEnd; ++iport) {
+     (void)demo_tx_frame(iport);
+   }
+}
+
+CODE_END
+
+CMD_END
+
+# !==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo evc [ clear | statistics ]
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: evc
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = has_clear
+CMD_VAR = has_statistics
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+demo_session_id = session_id;
+if (has_clear) {
+
+        demo_evc_main_ece_clear(0);
+
+} else if (has_statistics) {
+
+        demo_evc_main_ece_statistics(0);
+
+} else {
+
+        demo_evc_main();
+}
+CODE_END
+
+CMD_END
+
+# !==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo acl
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: acl
+
+CMD_VAR = 
+CMD_VAR = 
+
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+create_acl_main();
+VARIABLE_END
+
+CODE_BEGIN
+CODE_END
+
+CMD_END
+
+
+!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo qce [ port ]
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: qce
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = has_port
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+demo_session_id = session_id;
+if (has_port) {
+
+//        demo_qce_config_key();
+
+} else {
+
+  //      demo_qce_create();
+
+}
+CODE_END
+
+CMD_END
+
+# --------------------------
+
+!====================================================================
+CMD_BEGIN
+
+DOC_CMD_DESC = Set the 1st system test.
+DOC_CMD_DEFAULT =
+DOC_CMD_USAGE = 
+DOC_CMD_EXAMPLE = system gi 1/5 category test1 2
+
+FUNC_NAME =
+FUNC_REUSE =
+
+PRIVILEGE = ICLI_PRIVILEGE_10
+PROPERTY = 
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+#CMD_MODE = ICLI_CMD_MODE_INTERFACE_PORT_LIST
+MODE_VAR =
+RUNTIME =
+
+COMMAND = system <port_type_list> torben test1
+#COMMAND = system <range_list> category test1
+#COMMAND = system category test1 [{1|2|3|4|5}]
+
+HELP = System
+HELP = Ports
+HELP = Category
+HELP = Test 1
+
+CMD_VAR = 
+CMD_VAR = plist
+CMD_VAR =
+CMD_VAR = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+#if 0
+int i;
+VARIABLE_END
+
+CODE_BEGIN
+demo_session_id = session_id;
+    //  Loop over switch, port, vlans
+
+    for (i = 0; i < plist->cnt; ++i) {
+        u16 isid;
+
+        isid = plist->switch_range[i].isid;
+
+        u16 iportBegin = plist->switch_range[i].begin_iport;
+        u16 k;
+
+        for (k = 0; k < plist->switch_range[i].port_cnt; ++k) {
+          ICLI_PRINTF("isid=%u, port=%d\n", isid, k + iportBegin);
+        }
+    }
+    //    VTSS_RC(tc_system_cmd_test_set(session_id, FALSE, ports, 1, op1, op2, op3, op4, op5));
+#endif
+CODE_END
+
+CMD_END
+
+!====================================================================
+CMD_BEGIN
+
+DOC_CMD_DESC = Set the 2nd system test.
+DOC_CMD_DEFAULT =
+DOC_CMD_USAGE = 
+DOC_CMD_EXAMPLE = system gi 1/5 category test2 5
+
+FUNC_NAME =
+FUNC_REUSE =
+
+PRIVILEGE = ICLI_PRIVILEGE_10
+PROPERTY = 
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+#CMD_MODE = ICLI_CMD_MODE_INTERFACE_PORT_LIST
+MODE_VAR =
+RUNTIME =
+
+COMMAND = system <port_type_list> torben test2
+#COMMAND = system <range_list> category test2
+#COMMAND = system <port_type_list> category  test2 [{1|2|3|4|5}]
+
+
+HELP = System
+HELP = ports
+HELP = Category
+HELP = Test 2
+
+CMD_VAR = 
+CMD_VAR = ports
+CMD_VAR =
+CMD_VAR = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+      //    VTSS_RC(tc_system_cmd_test_set(session_id, FALSE, ports, 2, op1, op2, op3, op4, op5));
+CODE_END
+
+CMD_END
+
+!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo shaper <100-1000000>
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+NO_FORM_DOC_CMD_DESC    = 
+NO_FORM_DOC_CMD_DEFAULT = 
+NO_FORM_DOC_CMD_USAGE   = 
+NO_FORM_DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: shaper
+! 3: <0-1000000>
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = rate
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = <rate : 0-1000000>
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+demo_session_id = session_id;
+
+if ( demo_shaper(rate) ) ICLI_PRINTF("Failed\n");
+CODE_END
+
+NO_FORM_CODE_BEGIN
+demo_session_id = session_id;
+if ( demo_shaper(VTSS_BITRATE_DISABLED) ) ICLI_PRINTF("Failed\n");
+NO_FORM_CODE_END
+
+CMD_END
+
+#!==============================================================================
+CMD_BEGIN
+IF_FLAG = 
+
+COMMAND = demo oam [up|down] [ccm|ccm-lm|lbm|lbr|lmm|lmr|dmm|dmr|1dm|ltm|ltr|generic] isdx <0-1023>
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+NO_FORM_DOC_CMD_DESC    = 
+NO_FORM_DOC_CMD_DEFAULT = 
+NO_FORM_DOC_CMD_USAGE   = 
+NO_FORM_DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: oam
+! 3: tx
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR =  has_up 
+CMD_VAR =  has_down
+CMD_VAR =  has_ccm
+CMD_VAR =  has_ccmlm
+CMD_VAR =  has_lbm
+CMD_VAR =  has_lbr
+CMD_VAR =  has_lmm
+CMD_VAR =  has_lmr
+CMD_VAR =  has_dmm
+CMD_VAR =  has_dmr
+CMD_VAR =  has_1dm
+CMD_VAR =  has_ltm
+CMD_VAR =  has_ltr
+CMD_VAR =  has_gen
+CMD_VAR =  isdx
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = This a demo application to show specifik functionality
+HELP = OAM (Y.1731) releated operation
+HELP = Transmit a CCM frame
+HELP = Tramsmit a CCM frame with loss measurment information
+HELP = 
+HELP = 
+HELP = 
+HELP = 
+HELP = 
+HELP = 
+HELP = 
+HELP = 
+HELP = 
+HELP = 
+HELP = Specify to TX ISDX that shall be used for the frame transmitted
+HELP = The TX ISDX number
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+int r;
+VARIABLE_END
+
+CODE_BEGIN
+
+#ifdef DEMO_OAM
+
+demo_session_id = session_id;
+r=0;
+if (has_ccm)   r=1;
+if (has_ccmlm) r=2;
+if (has_lbm) r=3;
+if (has_lbr) r=4;
+if (has_lmm) r=5;
+if (has_lmr) r=6;
+if (has_dmm) r=7;
+if (has_dmr) r=8;
+if (has_1dm) r=9;
+if (has_ltm) r=10;
+if (has_ltr) r=11;
+if (has_gen) r=12;
+
+if (r) {
+    demo_oam_tx(r, isdx, has_up);
+}
+
+
+ICLI_PRINTF("isdx=%d\n", isdx);
+#else
+ICLI_PRINTF("Not supported: DEMO_OAM is not defined. See module_demo.in\n");
+#endif
+
+CODE_END
+
+CMD_END
+
+#!==============================================================================
+CMD_BEGIN
+IF_FLAG = 
+
+COMMAND = demo oam create {up|down} {ccm|lm-dual-ended|lm-single-ended|dm-dual-ended|dm-single-ended|sl-dual-ended|sl-single-ended|lb|lt}
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+NO_FORM_DOC_CMD_DESC    = 
+NO_FORM_DOC_CMD_DEFAULT = 
+NO_FORM_DOC_CMD_USAGE   = 
+NO_FORM_DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: oam
+! 3: tx
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR =  has_up 
+CMD_VAR =  has_down
+CMD_VAR =  has_ccm
+CMD_VAR =  has_lm_de
+CMD_VAR =  has_lm_se
+CMD_VAR =  has_dm_de
+CMD_VAR =  has_dm_se
+CMD_VAR =  has_sl_de
+CMD_VAR =  has_sl_se
+CMD_VAR =  has_lb
+CMD_VAR =  has_lt
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = This a demo application to show specifik functionality
+HELP = OAM (Y.1731) releated operation
+HELP =
+HELP = Configure a UpMEP
+HELP = Configure a DownMEP
+HELP = Transmit a CCM frame
+HELP = Tramsmit Dual ended Loss measurments, i.e. CCM frame with loss measurment information.
+HELP = Tramsmit Single ended Loss measurments, i.e. use LMM/LMR PDUs
+HELP = Tramsmit Dual ended Delay measurments, i.e. use 1DM PDUs
+HELP = Tramsmit Single ended Delay measurments, i.e. use DMM/DMR PDUs
+HELP = Tramsmit Dual ended Syntetic Loss measurments, i.e. use 1SL PDUs
+HELP = Tramsmit Single ended Syntetic Loss measurments, i.e. use SLM/SLR PDUs
+HELP = Tramsmit (Single ended) Loopback messages, i.e. use LBM/LBR PDUs
+HELP = Tramsmit (Single ended) Linktrace messages, i.e. use LTM/LTR PDUs
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+int r;
+VARIABLE_END
+
+CODE_BEGIN
+
+#ifdef DEMO_OAM
+
+demo_session_id = session_id;
+r=0;
+
+if (has_ccm)   r |= DEMO_FLAG_CCM;
+if (has_lm_de) r |= DEMO_FLAG_CCM_LM;
+if (has_lm_se) r |= DEMO_FLAG_LM;
+if (has_dm_de) r |= DEMO_FLAG_DM_DE;
+if (has_dm_se) r |= DEMO_FLAG_DM_SE;
+if (has_sl_de) r |= DEMO_FLAG_SL_DE;
+if (has_sl_se) r |= DEMO_FLAG_SL_SE;
+if (has_lb)    r |= DEMO_FLAG_LT;
+if (has_lt)    r |= DEMO_FLAG_TST;
+
+
+if (has_up)
+  demo_oam_up(r);
+else
+  demo_oam_down(r);
+
+
+#else
+ICLI_PRINTF("Not supported: DEMO_OAM is not defined. See module_demo.in\n");
+#endif
+
+
+CODE_END
+
+
+
+
+CMD_END
+
+#!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo options
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: qce
+
+CMD_VAR = 
+CMD_VAR = 
+
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+demo_session_id = session_id;
+demo_options();
+CODE_END
+
+CMD_END
+
+
+#!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo mce-dump [all]
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: mce-dump
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = has_all
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+
+#ifdef VTSS_SW_OPTION_DEMO_MCE
+demo_session_id = session_id;
+demo_mce_add_print(has_all);
+#endif
+
+CODE_END
+
+CMD_END
+
+#!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo oam voe
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: mce-dump
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR =
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+
+#ifdef DEMO_OAM
+demo_session_id = session_id;
+demo_print_vop();
+#endif
+
+CODE_END
+
+CMD_END
+
+#!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo port <0-50>
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: mce-dump
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = port
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+
+#ifdef VTSS_SW_OPTION_DEMO_MCE
+demo_session_id = session_id;
+demo_read_port_counters(port);
+#endif
+
+CODE_END
+
+CMD_END
+
+#!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo api [acl]
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = ICLI_CMD_PROP_GREP
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: show
+! 2: api
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = has_acl
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+
+  demo_debug_print();
+
+CODE_END
+
+CMD_END
+
+!==============================================================================
+
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo mactable
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: mactable
+
+CMD_VAR = 
+CMD_VAR = 
+
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+demo_dump_mac_table();
+CODE_END
+
+CMD_END
+
+
+#!==============================================================================
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo mactable2
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: mactable2
+
+CMD_VAR = 
+CMD_VAR = 
+
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+demo_dump_mac_table2();
+CODE_END
+
+CMD_END
+
+
+#!==============================================================================
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo macdel
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: macdel
+
+CMD_VAR = 
+CMD_VAR = 
+
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+demo_mac_del();
+CODE_END
+
+CMD_END
+
+
+#!==============================================================================
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo vlan [print]
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: vlan
+
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = has_print
+
+RUNTIME = 
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+if (has_print)
+ demo_vlan_evc_counters();	
+else
+ demo_vlan_evc();	
+CODE_END
+
+CMD_END
+
+
+#!==============================================================================
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo packet-api
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: vlan
+
+CMD_VAR = 
+CMD_VAR = 
+
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+demo_packet_api();
+CODE_END
+
+CMD_END
+
+
+#!==============================================================================
+CMD_BEGIN
+
+IF_FLAG = 
+
+COMMAND = demo fdma-dump
+
+DOC_CMD_DESC    = 
+DOC_CMD_DEFAULT = 
+DOC_CMD_USAGE   = 
+DOC_CMD_EXAMPLE = 
+
+FUNC_NAME = 
+FUNC_REUSE = 
+
+PRIVILEGE = ICLI_PRIVILEGE_15
+PROPERTY  = 
+
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+
+! 1: demo
+! 2: vlan
+
+CMD_VAR = 
+CMD_VAR = 
+
+RUNTIME = 
+RUNTIME = 
+
+HELP = 
+HELP = 
+
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+//demo_dump_fdma_cfg();
+demo_packet_api();
+CODE_END
+
+CMD_END
+
+#!==============================================================================

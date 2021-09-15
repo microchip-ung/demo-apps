@@ -1,0 +1,88 @@
+@chapter Adding a module
+
+In this chapter we shall add a module to the MSCC application. We will to it in two steps.
+First a simple module is added, where we restrict ourselves to do what is strictly necessary.
+
+@section Build simple application:
+
+The @file{demo/platform} contain a number of files that we eventally will build.
+But in order to get started we will only build the @file{demo_simple.c}. It contain an
+absolute minimum of infrastructure. So when you have made this work your well on your way.
+
+Go through the following steps and remember to take a couple of minutes to look into the @file{demo_simple.c} and
+the @file{module_demo.in_simple}.
+
+@enumerate
+@item
+Add @code{VTSS_MODULE_ID_DEMO} to @file{vtss_appl/include/vtss/appl/vtss_module_id.h}.
+If you use tags in your editor, then search for @code{VTSS_MODULE_ID_NONE}.
+You will have to edit 3 places. See the instructions just above
+@code{VTSS_MODULE_ID_NONE} in this file.
+
+@item
+Hook up the demo module with the MSCC application, i.e., edit 
+@file{vtss_appl/main/main.c}. Search for @code{VTSS_SW_OPTION_HTTPS} in that file,
+and do something similar, where you just change the @code{HTTPS} with @code{DEMO}.
+Three thing must be done:
+@itemize
+@item
+Include the @file{demo_api.h} if @code{VTSS_SW_OPTION_DEMO} is defined.
+
+@item
+Add the @code{demo_init()} function to the @code{initfun[]} list, if
+    @code{VTSS_SW_OPTION_DEMO} is defined.
+
+@item
+Add the @code{demo_error_txt()} function to the @code{error_txt()} function,
+    if @code{VTSS_SW_OPTION_DEMO} is defined.
+@end itemize
+
+@item
+@file{cp module_demo.in_simple ../../build/make/module_demo.in}.
+This add what is needed to the makefile system.
+Above we have defined @code{VTSS_MODULE_ID_DEMO} to some number. In @file{module_demo.in}
+we must set @code{MODULE_ID_demo} to the same number explicitly.
+
+@item
+If the line @code{Custom/AddModules =} does not exist in @file{config.mk}, then add the line
+@code{Custom/AddModules = demo}. If it does exist, then add @code{demo} to the end of the
+space seperated list, e.g., @code{Custom/AddModules = xxx yyy demo}
+
+
+
+@item
+In the build directory run @file{make clobber}. This is because we have
+change the make system. And then run @file{make -j} or just @file{make}.
+
+@item
+Upload to code to the target with e.g. the ramload method.
+
+@end enumerate
+When application eventually boot, you should
+be able to see some of the @code{printf} statements in the @code{demo_simple.c}.
+
+@section Build more advanced application:
+In this example, then functionality of @file{demo_simple.c} is replaced
+with @file{demo.c}, which has the same @code{demo_init()}, but with
+more relevant code put into the different cases. The makefile for demo
+is replaced with on that build more object files (step 1 below).
+
+@enumerate
+@item
+@file{cp module_demo.in_advance ../../build/make/module_demo.in}
+
+If you did not do the simple example in previous section, then go through step 2-4 in that section now.
+
+@item
+The @file{demo_icfg.c} application need some defines in @file{vtss_appl/icfg/icfg_api.h}
+in order to compile. Follow the instructions in the @file{demo_icfg.c} file.
+
+@item
+In the build directory run @file{make clobber}. This is because we have
+change the make system. And then run @file{make -j} or just @file{make}.
+
+@item
+Upload to code to the target. When it eventually boot, you should
+be able to see some of the printf statements in the @file{demo.c}.
+@end enumerate
+

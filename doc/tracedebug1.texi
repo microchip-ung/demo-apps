@@ -1,0 +1,85 @@
+@chapter Trace
+
+Trace messages are implemented on a module basis. The trace messages can be put into a number
+of disjunct groups, and the trace level can be configured per group within that module at run time.
+
+@section Introduction
+
+In order to have access to debug commands in general, the command
+@verbatim
+  # platform debug allow
+@end verbatim
+must be give.
+For trace the command is
+@verbatim
+  # debug trace module level <tab>
+@end verbatim
+If tab is pressed, as suggested above, the possible modules are listed. As an example we can choose @code{mstp}, i.e.
+@verbatim
+  # debug trace module level mstp <tab>
+@end verbatim
+If again tab is pressed, then the groups within the @code{mstp} module is shown.
+In this case it is
+@verbatim
+  control
+  default
+  interface
+@end verbatim
+So lets say
+@verbatim
+  # debug trace module level mstp default
+@end verbatim
+Giving this command, the status for the group @code{default} in module @code{mstp} will be shown.
+One of the elements in the status is the level.
+The level will most likely be @code{warning}, which means that messages at the level @code{warning}
+will be printed. This level can be changed. If we say
+@verbatim
+  # debug trace module level mstp default <tab>
+@end verbatim
+the possible levels will be shown, and we can choose one of them.
+
+@section Find the Trace implementation
+In the demo code @code{demo_trace.c} it is illustrated how the trace infrastructure is organized
+for a module.
+The macro 
+@verbatim
+  VTSS_TRACE_REGISTER(...)
+@end verbatim
+register the trace structure. Therefore, if we want to find out details about the trace for a module
+we can look for the structures similar to the one show in @code{demo_trace.c}.
+
+For example for mstp, if we did not have any idea of where the trace definitions was, we could say
+@verbatim
+  cd .../vtss_appl
+  grep VTSS_TRACE_MODULE_ID -r * | grep "mstp"
+@end verbatim
+and see if we can spot the right place. In this case it is @file{vtss_appl/mstp/platform/mstp.c}.
+If we search for @code{vtss_trace_grp_t} the groups @code{control}, @code{default} and @code{interface}
+will show up. All these groups have the default debug level of @code{warning} as given by @code{VTSS_TRACE_LVL_WARNING}.
+
+The method above to locating the trace implementation in a module may not always succeed, since in the example above this requires
+that @code{VTSS_TRACE_MODULE_ID} and then name of the module is on the same line. But then we just have to be more clever about it,
+or do some more manual searching.
+
+@section Trace messages
+In the @file{vtss_appl/util/vtss_trace_api.h} file, we can see the macros that should be used for tracing.
+It is easy to see, that there is a set of macros for each debug level.
+If we focus on the debug group, the most interesting macros are @code{T_D(...)} and @code{T_DG(...)}.
+What should be noted by the first one, is, that it apply to the group @code{VTSS_TRACE_GRP_DEFAULT}.
+Therefore, if we want to use that one, the group name @code{VTSS_TRACE_GRP_DEFAULT} should be
+defined. Normally a module has a group called @code{default}, and this number is associated with it.
+
+Of course a module do not need to have a default group, but if we want to use @code{T_D(...)} then we should.
+The second macro @code{T_DG(grp,...)} is similar to @code{T_D(...)} except we can specify the group.
+
+So looking in @file{mstp.c}, if we say
+@verbatim
+  T_DG(VTSS_TRACE_GRP_CONTROL, "Something");
+@end verbatim
+then this statement is not printed by default since the default levelt is @code{warning}; but if we say
+@verbatim
+  debug trace module level mstp control debug
+@end verbatim
+then it will.
+
+
