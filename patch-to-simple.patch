@@ -1,0 +1,88 @@
+diff --git a/build/configs/smb_multi.mk b/build/configs/smb_multi.mk
+index bdbbb8c..0458a92 100644
+--- a/build/configs/smb_multi.mk
++++ b/build/configs/smb_multi.mk
+@@ -58,6 +58,7 @@ SMB_PROFILE_LIST = \
+ 
+ # To enable Private MIBs, comment in the following line:
+ # Custom/AddModules := private_mib private_mib_gen
++Custom/AddModules := demo
+ 
+ # Custom/Stage2 := debug
+ 
+diff --git a/vtss_appl/include/vtss/appl/module_id.h b/vtss_appl/include/vtss/appl/module_id.h
+index 1cf7a25..1d23b43 100644
+--- a/vtss_appl/include/vtss/appl/module_id.h
++++ b/vtss_appl/include/vtss/appl/module_id.h
+@@ -203,6 +203,7 @@ enum {
+     VTSS_MODULE_ID_DHCP6_RELAY          = 145,
+     VTSS_MODULE_ID_DHCP6_SNOOPING       = 146,
+     VTSS_MODULE_ID_IPV6_SOURCE_GUARD    = 147,
++    VTSS_MODULE_ID_DEMO                 = 148,
+ 
+     /*
+      * INSERT NEW MODULE IDS HERE. AND ONLY HERE!!!
+diff --git a/vtss_appl/main/main.cxx b/vtss_appl/main/main.cxx
+index 941d377..a10ac65 100644
+--- a/vtss_appl/main/main.cxx
++++ b/vtss_appl/main/main.cxx
+@@ -477,6 +477,10 @@
+ #include "vtss_optional_modules_api.h"
+ #endif
+ 
++#if defined(VTSS_SW_OPTION_DEMO)
++#include "demo_api.h"
++#endif
++
+ #if defined(CYGPKG_IO_FILEIO) && defined(CYGPKG_FS_RAM) && defined(VTSS_SW_OPTION_ICFG)
+ #include <unistd.h>
+ #include <cyg/fileio/fileio.h>
+@@ -915,6 +919,10 @@ static struct {
+     INITFUN(vtss_optional_modules_init)
+ #endif
+ 
++#if defined(VTSS_SW_OPTION_DEMO)
++    INITFUN(demo_init)
++#endif
++
+ // **** NOTE: vtss_icfg_late_init must be last in this list ****
+ #ifdef VTSS_SW_OPTION_ICFG
+     INITFUN(vtss_icfg_late_init)
+@@ -1320,7 +1328,12 @@ const char *error_txt(mesa_rc rc)
+             txt = thread_load_monitor_error_txt(rc);
+             break;
+ #endif
+-        default:
++#if defined(VTSS_SW_OPTION_DEMO)
++        case VTSS_MODULE_ID_DEMO:
++            txt = demo_error_txt(rc);
++            break;
++#endif
++	default:
+             txt = txt_default;
+             break;
+         }
+diff --git a/vtss_appl/util/vtss_module_id.cxx b/vtss_appl/util/vtss_module_id.cxx
+index 708b2a9..7642abe 100644
+--- a/vtss_appl/util/vtss_module_id.cxx
++++ b/vtss_appl/util/vtss_module_id.cxx
+@@ -181,6 +181,7 @@ const char * const vtss_module_names[VTSS_MODULE_ID_NONE + 1] =
+     [VTSS_MODULE_ID_DHCP6_RELAY]      /* 145 */ = "DHCPv6Relay",
+     [VTSS_MODULE_ID_DHCP6_SNOOPING]   /* 146 */ = "DHCPv6_Snooping",
+     [VTSS_MODULE_ID_IPV6_SOURCE_GUARD] /*147 */ = "IPv6_Source_Guard",
++    [VTSS_MODULE_ID_DEMO]              /*148 */ = "Demo",
+ 
+     /* Add new module name above it. And please don't use space
+        in module name, use underscore instead. */
+@@ -555,6 +556,11 @@ const int vtss_priv_lvl_groups_filter[VTSS_MODULE_ID_NONE+1] =
+     /*[VTSS_MODULE_ID_DHCP6_RELAY]      145 */ 1,
+     /*[VTSS_MODULE_ID_DHCP6_SNOOPING]   146 */ 1,
+     /*[VTSS_MODULE_ID_IPV6_SOURCE_GUARD] 147 */ 1,
++#ifdef VTSS_SW_OPTION_DEMO
++    /*[VTSS_MODULE_ID_DEMO]              148 */ 1,
++#else
++    /*[VTSS_MODULE_ID_DEMO]              148 */ 1,
++#endif
+ 
+     /* Hint:
+      * For a new module, if the module needs an independent privilege level group

@@ -1,0 +1,33 @@
+! This is a plain-text template file for the initial specification of commands
+! for the new VTSS ICLI.
+!
+! Please read icli-cmd-spec-README.txt for details and guidance.
+!
+!
+! NOTE: Delete all irrelevant modes; add any new modes.
+
+user exec
+  !!
+
+privileged exec
+  !!
+
+global config
+  !!
+
+vlan <vlan_id>
+  !!
+
+interface common
+  !!
+
+interface vlan <vlan_id>
+  !!
+
+interface ethernet <port_id>
+  !!
+
+line
+  !!
+
+! End of file.
