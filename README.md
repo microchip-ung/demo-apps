@@ -1,4 +1,8 @@
 This module shall be placed under vtss_appl, i.e., vtss_appl/demo/
+$ cd <webstax-source-root>/vtss_appl
+$ git clone git@github.com:microchip-ung/demo-appl demo
+$ cd demo
+$ git checkout 3.67
 
 
 Preparation:
