@@ -1,0 +1,120 @@
+
+INCLUDE_BEGIN
+#include "tc_system/cmd/tc_system_cmd.h"
+INCLUDE_END
+
+!====================================================================
+CMD_BEGIN
+
+DOC_CMD_DESC = Set the 1st system test.
+DOC_CMD_DEFAULT =
+DOC_CMD_USAGE = 
+DOC_CMD_EXAMPLE = system gi 1/5 category test1 2
+
+FUNC_NAME =
+FUNC_REUSE =
+
+PRIVILEGE = ICLI_PRIVILEGE_10
+PROPERTY = 
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+RUNTIME =
+
+COMMAND = system <port_type_list> category test1 [{1|2|3|4|5}]
+
+HELP = System
+HELP = ##ICLI_HELP_PORT_TYPE_LIST
+HELP = Category
+HELP = Test 1
+HELP = Option 1
+HELP = Option 2
+HELP = Option 3
+HELP = Option 4
+HELP = Option 5
+
+CMD_VAR = 
+CMD_VAR = ports
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = op1
+CMD_VAR = op2
+CMD_VAR = op3
+CMD_VAR = op4
+CMD_VAR = op5
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+    VTSS_RC(tc_system_cmd_test_set(session_id, FALSE, ports, 1, op1, op2, op3, op4, op5));
+CODE_END
+
+CMD_END
+
+!====================================================================
+CMD_BEGIN
+
+DOC_CMD_DESC = Set the 2nd system test.
+DOC_CMD_DEFAULT =
+DOC_CMD_USAGE = 
+DOC_CMD_EXAMPLE = system gi 1/5 category test2 5
+
+FUNC_NAME =
+FUNC_REUSE =
+
+PRIVILEGE = ICLI_PRIVILEGE_10
+PROPERTY = 
+CMD_MODE = ICLI_CMD_MODE_GLOBAL_CONFIG
+MODE_VAR =
+RUNTIME =
+
+COMMAND = system <port_type_list> category test2 [{1|2|3|4|5}]
+
+HELP = System
+HELP = ##ICLI_HELP_PORT_TYPE_LIST
+HELP = Category
+HELP = Test 2
+HELP = Option 1
+HELP = Option 2
+HELP = Option 3
+HELP = Option 4
+HELP = Option 5
+
+CMD_VAR = 
+CMD_VAR = ports
+CMD_VAR = 
+CMD_VAR = 
+CMD_VAR = op1
+CMD_VAR = op2
+CMD_VAR = op3
+CMD_VAR = op4
+CMD_VAR = op5
+
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+BYWORD = 
+
+VARIABLE_BEGIN
+VARIABLE_END
+
+CODE_BEGIN
+    VTSS_RC(tc_system_cmd_test_set(session_id, FALSE, ports, 2, op1, op2, op3, op4, op5));
+CODE_END
+
+CMD_END

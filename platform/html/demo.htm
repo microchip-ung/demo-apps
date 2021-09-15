@@ -1,0 +1,42 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html>
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <title>DEMO Configuration</title>
+    <link href="lib/normal.css" rel="stylesheet" type="text/css">
+    <script type="text/javascript" src="lib/config.js"></script>
+    <script type="text/javascript" src="lib/ajax.js"></script>
+    <script type="text/javascript" src="lib/spom.js"></script>
+    <script type="text/javascript" src="lib/dynforms.js"></script>
+    <script type="text/javascript" src="lib/mootools-core.js"></script>
+    <script type="text/javascript" src="lib/MasterControl.js"></script>
+    <script type="text/javascript">
+
+      var help_page="/help/help_demo.htm";
+
+      function processUpdate(l,m) {
+        var n=document.getElementById("message");
+        var i=l.responseText.split("*");
+        var h=i[0];var k=i.slice(1);
+        var j;
+
+        if (h==="OK") {
+          if (k.length!=2) {
+            n.innerHTML="Wrong amount of data."
+          } else {
+            j=document.getElementById("demo_number");
+            j.value=k[0];
+            j=document.getElementById("demo_enable");
+            j.checked=(k[1]==1?true:false)
+          }
+        } else {
+          if (h==="ERR") {
+            n.innerHTML="Could not retrieve DEMO settings. Please try again later."
+          }
+        }
+      }
+      
+      function requestUpdate() {
+      loadXMLDoc("/config/demo_conf_status?op=global",processUpdate,"file_list_rows")
+      }
+      function onSubmit(){x=document.getElementById("demo_number");if(isNaN(x.value)||x.value<0||x.value>10){alert("demo_number must be a number in the range 0-10");return false}return true};</script> </head> <body class="content" onload="requestUpdate();"> <div class="refreshbar"> <form action="#"> <input type="button" value="Refresh" onclick="requestUpdate(); this.blur();"> <img id="update" alt="" src="images/updating.gif"> </form> </div> <h1>Demo Page</h1> <form name="demo_form" method="POST" action="/config/demo_conf_status" onsubmit="return onSubmit();"> <input type="checkbox" id="demo_enable" name="demo_enable"/> <label for="demo_enable">Enable Demo (what ever that means)</label> <table summary="Demo numbers" cellspacing="0" class="config"> <thead> <tr> <th>Parameter</th> <th>Value</th> </tr> </thead> <tr class="config_even"> <th align="left"> demo_number: </th> <th> <input type="text" id="demo_number" name="demo_number" value="-" align="right" maxlength="5"> </tr> </table> <p id="message"></p> <p> <input type="submit" value="Save"> </p> </form> <img src="images/cxr.gif" alt="If this text is shown, then the cxr.gif was not foinde in vtss_appl/web/html/images"> <img src="images/home.gif" alt="This text should not be shown sin we kknow, that vtss_appl/web/html/images/home.gif exist"> <img src="images/qqq.gif" alt="The qqq.gif does not exist, so this text is shown instead"> </body> </html>

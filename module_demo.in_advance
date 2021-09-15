@@ -1,0 +1,98 @@
+########################################################-*- mode: Makefile -*-
+#
+# Vitesse Switch Software.
+#
+# Copyright (c) 2002-2013 Vitesse Semiconductor Corporation "Vitesse". All
+# Rights Reserved.
+#
+# Unpublished rights reserved under the copyright laws of the United States of
+# America, other countries and international treaties. Permission to use, copy,
+# store and modify, the software and its source code is granted. Permission to
+# integrate into other products, disclose, transmit and distribute the software
+# in an absolute machine readable format (e.g. HEX file) is also granted.  The
+# source code of the software may not be disclosed, transmitted or distributed
+# without the written permission of Vitesse. The software and its source code
+# may only be used in products utilizing the Vitesse switch products.
+#
+# This copyright notice must appear in any copy, modification, disclosure,
+# transmission or distribution of the software. Vitesse retains all ownership,
+# copyright, trade secret and proprietary rights in the software.
+#
+# THIS SOFTWARE HAS BEEN PROVIDED "AS IS," WITHOUT EXPRESS OR IMPLIED WARRANTY
+# INCLUDING, WITHOUT LIMITATION, IMPLIED WARRANTIES OF MERCHANTABILITY, FITNESS
+# FOR A PARTICULAR USE AND NON-INFRINGEMENT.
+#
+# ------------------------------------------------------------------------
+DIR_demo          := $(DIR_APPL)/demo
+DIR_demo_base     := $(DIR_demo)/base
+DIR_demo_base_src := $(DIR_demo)/base/src
+DIR_demo_base_inc := $(DIR_demo)/base/include
+DIR_demo_platform := $(DIR_demo)/platform
+DIR_demo_html     := $(DIR_demo_platform)/html
+
+
+MODULE_ID_demo := 148 # = VTSS_MODULE_ID_DEMO. If you have TAGS on the files,
+                      # then search for VTSS_MODULE_ID_NONE, and add
+                      # VTSS_MODULE_ID_DEMO just above it, and set
+                      # MODULE_ID_demo the the same number.
+
+OBJECTS_demo_base  :=
+
+OBJECTS_demo_platform1 :=	demo_simple.o
+
+OBJECTS_demo_platform :=	demo.o \
+				demo_msg.o \
+				demo_packet.o \
+				demo_l2proto.o \
+				demo_forward.o \
+				demo_trace.o \
+				demo_web.o \
+				demo_tx_frame.o \
+				demo_icfg.o \
+				demo_packet_api.o \
+				demo_mac.o \
+				demo_debug_print.o \
+				demo_options.o \
+				demo_shaper.o \
+				demo_vlan.o \
+				demo_acl.o \
+				demo_socket_client.o \
+				demo_socket_server.o \
+				demo_evc.o \
+
+#$(call if-module,json_rpc,    demo_jsontype.o)
+
+#OBJECTS_demo_platform_cxx :=	$(call if-module,json_rpc,    demo_json.o)
+
+OBJECTS_demo := $(OBJECTS_demo_platform) $(OBJECTS_demo_base) $(OBJECTS_demo_platform_cxx)
+
+# Built-in ICLI
+$(eval $(call if-module,demo,$(call if-module,icli,$(call add_icli,$(MODULE_ID_demo),$(DIR_demo_platform)/demo.icli))))
+
+$(OBJECTS_demo_platform): %.o: $(DIR_demo_platform)/%.c
+	$(call compile_cxx,$(MODULE_ID_demo), $@, $<)
+
+$(OBJECTS_demo_base): %.o: $(DIR_demo_base_src)/%.c
+	$(call compile_cxx,$(MODULE_ID_demo), $@, $<)
+
+$(OBJECTS_demo_platform_cxx): %.o: $(DIR_demo_platform)/%.cxx
+	$(call compile_cxx,$(MODULE_ID_demo), $@, $<)
+
+# Include files
+INCLUDES += -I$(DIR_demo_platform) -I$(DIR_demo_base_inc)
+
+# Web Content Generation
+WEB_CONTENT += $(DIR_demo_html)
+
+# Files to be linted
+LINT_FILES_demo += $(addprefix $(DIR_demo_base_src)/,$(OBJECTS_demo_base:.o=.c)) $(addprefix $(DIR_demo_platform)/,$(OBJECTS_demo_platform:.o=.c))
+
+# Code style files
+#VTSS_CODE_STYLE_CHK_FILES_demo += $(DIR_demo_base_src)/*.c $(DIR_demo_base_inc)/*.h $(DIR_demo_platform)/*.c $(DIR_demo_platform)/*.h
+VTSS_CODE_STYLE_CHK_FILES_demo +=  $(DIR_demo_platform)/*.c $(DIR_demo_platform)/*.h
+
+# Tidy files
+#TIDY_FILES_demo += $(DIR_demo_html)/*.htm $(DIR_demo_html)/help/*.htm
+
+# JSlint files
+#JSLINT_FILES_demo += $(TIDY_FILES_demo)

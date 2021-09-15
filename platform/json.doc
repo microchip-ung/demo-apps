@@ -1,0 +1,43 @@
+[torbenf@localhost json-rpc-util]$ ./vson -d 10.10.133.128 -u admin -c call demo.somedata.something.get
+Calling demo.somedata.something.get:
+    SomeInterestingNumber:  2
+    SomeCoolString:        ff
+
+[torbenf@localhost json-rpc-util]$ ./vson -d 10.10.133.128 -u admin -c call demo.somedata.something.get --help
+Wrong number of arguments! Got 1 expected 0
+[torbenf@localhost json-rpc-util]$ ./vson -d 10.10.133.128 -u admin -c call --help 
+Usage: vson call [Options] <method> [<args>]
+
+Options:
+        --dump-requests              Dump the raw requests
+        --dump-response              Dump the raw response
+        --no-pretty-print            Disable pretty printing the responses
+    -h, --help                       Show this message
+
+Method: this is the json-rpc method to call.
+[torbenf@localhost json-rpc-util]$ ./vson -d 10.10.133.128 -u admin -c call dump-response demo.somedata.something.get 
+No such method found in the spec. Method name: dump-response
+./vson:359:in `cmd_call': undefined method `[]' for nil:NilClass (NoMethodError)
+	from ./vson:553:in `<main>'
+[torbenf@localhost json-rpc-util]$ ./vson -d 10.10.133.128 -u admin -c call --dump-response demo.somedata.something.get 
+Calling demo.somedata.something.get:
+  Post-body: {"id":"jsonrpc","error":null,"result":{"SomeInterestingNumber":2,"SomeCoolString":"ff"}}
+    SomeInterestingNumber:  2
+    SomeCoolString:        ff
+
+[torbenf@localhost json-rpc-util]$ ./vson -d 10.10.133.128 -u admin -c call --dump-response demo.somedata.something.set '{"SomeInterestingNumber":3,"SomeCoolString":"jj"}'
+{"SomeInterestingNumber":3,"SomeCoolString":"jj"}
+Calling demo.somedata.something.set:
+  Post-body: {"id":"jsonrpc","error":null,"result":null}
+
+
+[torbenf@localhost json-rpc-util]$ ./vson -d 10.10.133.128 -u admin -c call --dump-response --dump-req demo.somedata.something.set '{"SomeInterestingNumber":3,"SomeCoolString":"jj"}'
+{"SomeInterestingNumber":3,"SomeCoolString":"jj"}
+Calling demo.somedata.something.set:
+  Post-body: {"method":"demo.somedata.something.set","params":[{"SomeInterestingNumber":3,"SomeCoolString":"jj"}],"id":"jsonrpc"}
+  Post-body: {"id":"jsonrpc","error":null,"result":null}
+
+
+[torbenf@localhost json-rpc-util]$ curl  http://admin:@10.10.133.128/json_rpc  -d  '{"method":"demo.somedata.something.set","params":[{"SomeInterestingNumber":3,"SomeCoolString":"jj"}],"id":"jsonrpc"}'
+{"id":"jsonrpc","error":null,"result":null}[torbenf@localhost json-rpc-util]$ 
+[torbenf@localhost json-rpc-util]$ 

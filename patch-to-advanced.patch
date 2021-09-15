@@ -1,0 +1,133 @@
+diff --git a/build/configs/istax_arm64_multi.mk b/build/configs/istax_arm64_multi.mk
+index ae66aac..dfb9517 100644
+--- a/build/configs/istax_arm64_multi.mk
++++ b/build/configs/istax_arm64_multi.mk
+@@ -37,7 +37,7 @@ ISTAX_PROFILE_LIST =      \
+ #Custom/Defines     := -DVTSS_SW_OPTION_DEBUG -DVTSS_SW_OPTION_ASAN
+ 
+ Custom/OmitModules := zls30341
+-Custom/AddModules  := tsn tsn_frer
++Custom/AddModules  := tsn tsn_frer demo
+ 
+ # Build all listed profiles
+ 
+diff --git a/vtss_appl/icfg/icfg_api.h b/vtss_appl/icfg/icfg_api.h
+index 06f461b..f90498b 100644
+--- a/vtss_appl/icfg/icfg_api.h
++++ b/vtss_appl/icfg/icfg_api.h
+@@ -443,9 +443,17 @@ typedef enum {
+     //------------------------- CFM MD submode end ------------------------------
+ #endif /* VTSS_SW_OPTION_CFM */
+ 
++#if defined(VTSS_SW_OPTION_DEMO)
++    VTSS_ICFG_DEMO,
++#endif
++
+     //------------------------- Interface Ethernet submode begin --------------
+     VTSS_ICFG_INTERFACE_ETHERNET_BEGIN,
+ 
++#if defined(VTSS_SW_OPTION_DEMO)
++    VTSS_ICFG_DEMO_INTERFACE_CONFIG,
++#endif
++
+ #ifdef VTSS_SW_OPTION_VOICE_VLAN
+     VTSS_ICFG_INTERFACE_ETHERNET_VOICE_VLAN,
+ #endif
+@@ -622,6 +630,10 @@ typedef enum {
+     //------------------------- Interface VLAN submode begin ------------------
+     VTSS_ICFG_INTERFACE_VLAN_BEGIN,
+ 
++#if defined(VTSS_SW_OPTION_DEMO)
++    VTSS_ICFG_DEMO_INTERFACE_VLANCONFIG,
++#endif
++
+ #ifdef VTSS_SW_OPTION_IP
+     VTSS_ICFG_IPV4_VLAN_INTERFACE,
+ #endif /* VTSS_SW_OPTION_IP */
+diff --git a/vtss_appl/include/vtss/appl/module_id.h b/vtss_appl/include/vtss/appl/module_id.h
+index 8aaa077..7a02cb1 100644
+--- a/vtss_appl/include/vtss/appl/module_id.h
++++ b/vtss_appl/include/vtss/appl/module_id.h
+@@ -211,6 +211,7 @@ enum {
+     VTSS_MODULE_ID_FRR_OSPF6            = 156,
+     VTSS_MODULE_ID_FRER                 = 157,
+     VTSS_MODULE_ID_KR                   = 158,
++    VTSS_MODULE_ID_DEMO                 = 159,
+ 
+     /*
+      * INSERT NEW MODULE IDS HERE. AND ONLY HERE!!!
+diff --git a/vtss_appl/main/main.cxx b/vtss_appl/main/main.cxx
+index 80df25c..cb30130 100644
+--- a/vtss_appl/main/main.cxx
++++ b/vtss_appl/main/main.cxx
+@@ -472,6 +472,10 @@
+ #include "vtss_optional_modules_api.h"
+ #endif
+ 
++#ifdef VTSS_SW_OPTION_DEMO
++#include "demo_api.h"
++#endif
++
+ #if defined(CYGPKG_IO_FILEIO) && defined(CYGPKG_FS_RAM) && defined(VTSS_SW_OPTION_ICFG)
+ #include <unistd.h>
+ #include <cyg/fileio/fileio.h>
+@@ -895,6 +899,9 @@ static struct {
+ #ifdef VTSS_SW_OPTION_PSFP
+     INITFUN(psfp_init)
+ #endif
++#ifdef VTSS_SW_OPTION_DEMO
++    INITFUN(demo_init)
++#endif
+ 
+ // **** NOTE: vtss_icfg_late_init must be last in this list ****
+ #ifdef VTSS_SW_OPTION_ICFG
+@@ -1319,6 +1326,11 @@ const char *error_txt(mesa_rc rc)
+             txt = kr_error_txt(rc);
+             break;
+ #endif
++#ifdef VTSS_SW_OPTION_DEMO
++        case VTSS_MODULE_ID_DEMO:
++            txt = demo_error_txt(rc);
++            break;
++#endif
+         default:
+             txt = txt_default;
+             break;
+diff --git a/vtss_appl/util/vtss_module_id.cxx b/vtss_appl/util/vtss_module_id.cxx
+index 2493e40..7c1fc5d 100644
+--- a/vtss_appl/util/vtss_module_id.cxx
++++ b/vtss_appl/util/vtss_module_id.cxx
+@@ -190,6 +190,7 @@ const char * const vtss_module_names[VTSS_MODULE_ID_NONE + 1] =
+     [VTSS_MODULE_ID_FRR_OSPF6]             /* 156 */ = "FRR_OSPF6",
+     [VTSS_MODULE_ID_FRER]                  /* 157 */ = "FRER",
+     [VTSS_MODULE_ID_KR]                    /* 158 */ = "KR",
++    [VTSS_MODULE_ID_DEMO]                  /* 159 */ = "DEMO",
+ 
+     /* Add new module name above it. And please don't use space
+        in module name, use underscore instead. */
+@@ -539,6 +540,11 @@ const int vtss_priv_lvl_groups_filter[VTSS_MODULE_ID_NONE+1] =
+     /*[VTSS_MODULE_ID_FRR_OSPF6]             156 */ 1,
+     /*[VTSS_MODULE_ID_FRER]                  157 */ 1,
+     /*[VTSS_MODULE_ID_KR]                    158 */ 1,
++#ifdef VTSS_SW_OPTION_DEMO
++    /*[VTSS_MODULE_ID_DEMO]                  159 */ 1,
++#else
++    /*[VTSS_MODULE_ID_DEMO]                  159 */ 1,
++#endif
+ 
+     /* Hint:
+      * For a new module, if the module needs an independent privilege level group
+diff --git a/vtss_appl/web/menu_default.cxx b/vtss_appl/web/menu_default.cxx
+index 470e400..410e789 100644
+--- a/vtss_appl/web/menu_default.cxx
++++ b/vtss_appl/web/menu_default.cxx
+@@ -50,6 +50,9 @@ int WEB_navbar(CYG_HTTPD_STATE* p, int &size) {
+ 
+     ITEM("Configuration");
+     ITEM(" System");
++#if defined(VTSS_SW_OPTION_DEMO)
++    ITEM("  DEMO,demo.htm");
++#endif
+ #if defined(VTSS_SW_OPTION_POST)
+     ITEM("  POST,post_config.htm");
+ #endif
